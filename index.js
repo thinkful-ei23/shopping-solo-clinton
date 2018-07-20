@@ -10,12 +10,25 @@
 // indicates if it's checked off or not.
 // we're pre-adding items to the shopping list so there's
 // something to see when the page first loads.
-const STORE = [
-  {name: 'apples', checked: false},
-  {name: 'oranges', checked: false},
-  {name: 'milk', checked: true},
-  {name: 'bread', checked: false}
-];
+const STORE = {
+  items: [
+    {name: 'apples', checked: false},
+    {name: 'oranges', checked: false},
+    {name: 'milk', checked: true},
+    {name: 'bread', checked: false}
+  ],
+  displayChecked: true,
+};
+
+
+function handleDisplayUncheckedClicked() {
+  $('.js-unchecked-only').on('change', function() {
+    console.log('Toggling display of unchecked items');
+    STORE.displayChecked = !STORE.displayChecked;
+    renderShoppingList();
+  });
+}
+
 
 function generateItemElement(item, itemIndex, template) {
   return `
@@ -32,6 +45,7 @@ function generateItemElement(item, itemIndex, template) {
 	</li>`;
 }
 
+
 function generateShoppingItemsString(shoppingList)	{
   console.log('Generating shopping list element');
 
@@ -45,7 +59,14 @@ function renderShoppingList() {
   // this function will be responsible for rendering the shopping list in
   // the DOM
   console.log('`renderShoppingList` ran');
-  const shoppingListItemsString = generateShoppingItemsString(STORE);
+  let shoppingListItemsString = '';
+  if (STORE.displayChecked === false) {
+    const uncheckedOnly = STORE.items.filter(item => item.checked === false);
+    shoppingListItemsString = generateShoppingItemsString(uncheckedOnly);
+  } else {
+    shoppingListItemsString = generateShoppingItemsString(STORE.items);
+  }
+  
   $('.js-shopping-list').html(shoppingListItemsString);
 
 }
@@ -53,7 +74,7 @@ function renderShoppingList() {
 
 function addItemToShoppingList(itemName) {
   console.log(`Adding "${itemName}" to shopping list`);
-  STORE.push({name: itemName, checked: false});
+  STORE.items.push({name: itemName, checked: false});
 }
 
 
@@ -73,7 +94,7 @@ function handleNewItemSubmit() {
 
 function toggleCheckedForListItem(itemIndex) {
   console.log('Toggling checked property for item at index ' + itemIndex);
-  STORE[itemIndex].checked = !STORE[itemIndex].checked;
+  STORE.items[itemIndex].checked = !STORE.items[itemIndex].checked;
 }
 
 
@@ -100,8 +121,8 @@ function handleItemCheckClicked() {
 
 
 function deleteItemClicked(itemIndex) {
-	console.log(`Deleting "${STORE[itemIndex].name}" from shopping list`);
-  STORE.splice(itemIndex, 1);
+  console.log(`Deleting "${STORE.items[itemIndex].name}" from shopping list`);
+  STORE.items.splice(itemIndex, 1);
 }
 
 
@@ -126,6 +147,7 @@ function handleShoppingList() {
   handleNewItemSubmit();
   handleItemCheckClicked();
   handleDeleteItemClicked();
+  handleDisplayUncheckedClicked();
 }
 
 
