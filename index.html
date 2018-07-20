@@ -15,8 +15,17 @@
             <label for="shopping-list-entry">Add an item</label>
             <input type="text" name="shopping-list-entry" class="js-shopping-list-entry" placeholder="e.g., broccoli">
             <button type="submit">Add item</button>
-        </br>
-            <label for="unchecked-only">Only display unchecked items: </label>
+        </form>
+    </br>
+        <form id="js-shopping-list-search">
+            <label for="shopping-list-search">Search the list</label>
+            <input type="text" name="shopping-list-search" class="js-list-search" placeholder="e.g., broccoli">
+            <button type="submit">Search</button>
+            <button type="reset">Clear</button>
+        </form>
+    </br>
+        <form id="js-shopping-list-filter">
+            <label for="unchecked-only">Hide checked items: </label>
             <input type="checkbox" name="unchecked-only" class="js-unchecked-only">
         </form>
         <ul class="shopping-list js-shopping-list">
