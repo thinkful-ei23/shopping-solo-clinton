@@ -162,7 +162,6 @@ function handleItemCheckClicked() {
   $('.js-shopping-list').on('click', '.js-item-toggle', event => {
     // get item's indexed location
     const itemIndex = getItemIndexFromElement(event.currentTarget);
-    console.log(itemIndex);
 
     // toggle `checked` value of item
     toggleCheckedForListItem(itemIndex);
