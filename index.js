@@ -21,7 +21,6 @@ const STORE = {
 // renders shopping list and inserts it into DOM
 function renderShoppingList() {
   /* console.log('`renderShoppingList` ran'); */
-
   // get search bar contents from DOM
   let searchValue = $('.js-list-search').val().toLowerCase();
 
@@ -39,16 +38,19 @@ function renderShoppingList() {
 // renders full item list from array of rendered items
 function generateListString(shoppingList)	{
   /* console.log('`generateListString` ran'); */
-
-  return shoppingList.map((item, index) => 
-    generateItemElement(item, index))
+  return shoppingList
+    .map((item) => {
+      // item index in filtered list may not match item index in `STORE`,
+      // so get item index from store item with matching name
+      const itemIndex = STORE.items.findIndex(obj => obj.name === item.name);
+      return generateItemElement(item, itemIndex);
+    })
     .join('');
 }
 
 // renders single item as HTML list item
 function generateItemElement(item, itemIndex/*, template*/) {
   /* console.log('`generateItemElement` ran'); */
-
   return `
 	<li class="js-item-index-element" data-item-index="${itemIndex}">
     <div class="js-shopping-item-name">
@@ -71,7 +73,6 @@ function generateItemElement(item, itemIndex/*, template*/) {
 // returns list of items filtered by user inputs
 function filterList(searchValue) {
   /* console.log('`filterList` ran'); */
-
   // default value is unfiltered list
   let filteredList = STORE.items;
   
@@ -93,7 +94,6 @@ function filterList(searchValue) {
 // listens for and handles search submissions
 function handleSearchItems() {
   /* console.log('`handleSearchItems` ran'); */
-
   $('#js-shopping-list-search').submit(function(event) {
     // prevent form submission default behavior
     event.preventDefault();
@@ -106,7 +106,6 @@ function handleSearchItems() {
 // listens for and handles search form reset
 function handleSearchReset() {
   /* console.log('`handleSearchReset` ran'); */
-
   $('#js-shopping-list-search').on('click', '[type="reset"]', function() {
     // clear search form input
     $('.js-list-search').val('');
@@ -119,7 +118,6 @@ function handleSearchReset() {
 // listens for and handles changes to `Hide checked items` checkbox
 function handleHideChecked() {
   /* console.log('`handleHideChecked` ran'); */
-
   $('.js-unchecked-only').on('change', function() {
     // toggle value of hidChecked in `STORE`
     STORE.hideChecked = !STORE.hideChecked;
@@ -135,7 +133,6 @@ function handleHideChecked() {
 // listens for and handles new item submissions
 function handleNewItemSubmit() {
   /* console.log('`handleNewItemSubmit` ran'); */
-
   $('#js-shopping-list-form').submit(function(event) {
     // prevent form submission default behavior
     event.preventDefault();
@@ -155,7 +152,6 @@ function handleNewItemSubmit() {
 // adds new item to `STORE`
 function addItemToShoppingList(itemName) {
   /* console.log('`addItemToShoppingList` ran'); */
-
   console.log(`Adding "${itemName}" to shopping list`);
   STORE.items.push({name: itemName, checked: false});
 }
@@ -163,10 +159,10 @@ function addItemToShoppingList(itemName) {
 // listens for and handles checking off existing items
 function handleItemCheckClicked() {
   /* console.log('`handleItemCheckClicked` ran'); */
-
   $('.js-shopping-list').on('click', '.js-item-toggle', event => {
     // get item's indexed location
     const itemIndex = getItemIndexFromElement(event.currentTarget);
+    console.log(itemIndex);
 
     // toggle `checked` value of item
     toggleCheckedForListItem(itemIndex);
@@ -184,7 +180,6 @@ function toggleCheckedForListItem(itemIndex) {
 // listens for and handles existing item deletions
 function handleItemDeleteClicked() {
   /* console.log('`handleItemDeleteClicked` ran'); */
-
   $('.js-shopping-list').on('click', '.shopping-item-delete', event => {
     // get item's indexed location
     const itemIndex = getItemIndexFromElement(event.currentTarget);
@@ -200,13 +195,13 @@ function handleItemDeleteClicked() {
 // deletes item at indexed location in `STORE`
 function itemDelete(itemIndex) {
   /* console.log('`itemDelete` ran'); */
-
   console.log(`Deleting "${STORE.items[itemIndex].name}" from shopping list`);
   STORE.items.splice(itemIndex, 1);
 }
 
 // gets indexed location of item
 function getItemIndexFromElement(item) {
+  /* console.log('`getItemIndexFromElement` ran'); */
   const itemIndexString = $(item)
     .closest('.js-item-index-element')
     .attr('data-item-index');
@@ -219,7 +214,6 @@ function getItemIndexFromElement(item) {
 // listens for and handles hover-preview of name editor
 function handleHoverEditPreview() {
   /* console.log('`handleHoverEditPreview` ran'); */
-
   // listen for `mouseenter` on item name
   $('ul').on('mouseenter', '.js-shopping-item', function() {
     // add border around item name
@@ -236,7 +230,6 @@ function handleHoverEditPreview() {
 // listens for and handles clicks on item names to open name editor
 function handleOpenNameEditor() {
   /* console.log('`handleOpenNameEditor` ran'); */
-
   $('ul').on('click', '.js-shopping-item', function() {
     // replace contents of <div> with output of `nameToInput`
     $(this).closest('.js-shopping-item-name').html(nameToInput($(this).text()));
@@ -246,7 +239,6 @@ function handleOpenNameEditor() {
 // returns name editor <form> pre-filled with current item name
 function nameToInput(name) {
   /* console.log('`nameToInput` ran'); */
-
   return `
     <form class="name-editor">
       <input type="text" name="name-value" class="js-name-value" value="${name}" onfocus="this.select()">
@@ -258,7 +250,6 @@ function nameToInput(name) {
 // listens for and handles name editor submissions
 function handleNameChangeSubmit() {
   /* console.log('`handleNameChangeSubmit` ran'); */
-
   $('.js-shopping-list').on('submit', '.name-editor', function(event) {
     // prevent form submission default behavior
     event.preventDefault();
@@ -280,7 +271,6 @@ function handleNameChangeSubmit() {
 // listens for and handles form reset to close name editor
 function handleNameChangeCancel() {
   /* console.log('`handleNameChangeCancel` ran'); */
-
   $('.js-shopping-item-name').on('click', '[type="reset"]', function() {
     // get item's indexed location
     const itemIndex = getItemIndexFromElement(event.currentTarget);
@@ -296,7 +286,6 @@ function handleNameChangeCancel() {
 // returns item name in custom <span>
 function inputToName(item) {
   /* console.log('`inputToName` ran'); */
-  
   return `
     <span class="shopping-item js-shopping-item ${item.checked ? 'shopping-item__checked' : ''}">${item.name}</span>`;
 }
