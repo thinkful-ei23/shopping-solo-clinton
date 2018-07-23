@@ -13,20 +13,20 @@
         <h1>Shopping List</h1>
         <form id="js-shopping-list-form">
             <label for="shopping-list-entry">Add an item</label>
-            <input type="text" name="shopping-list-entry" class="js-shopping-list-entry" placeholder="e.g., broccoli">
+            <input id="shopping-list-entry" type="text" name="shopping-list-entry" class="js-shopping-list-entry" placeholder="e.g., broccoli">
             <button type="submit">Add item</button>
         </form>
     </br>
         <form id="js-shopping-list-search">
             <label for="shopping-list-search">Search the list</label>
-            <input type="text" name="shopping-list-search" class="js-list-search" placeholder="e.g., broccoli">
+            <input id="shopping-list-search" type="text" name="shopping-list-search" class="js-list-search" placeholder="e.g., broccoli">
             <button type="submit">Search</button>
             <button type="reset">Clear</button>
         </form>
     </br>
         <form id="js-shopping-list-filter">
-            <label for="unchecked-only">Hide checked items: </label>
-            <input type="checkbox" name="unchecked-only" class="js-unchecked-only">
+            <label for="hide-checked">Hide checked items: </label>
+            <input id="hide-checked" type="checkbox" name="hide-checked" class="js-hide-checked">
         </form>
         <ul class="shopping-list js-shopping-list">
         </ul>

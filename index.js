@@ -6,10 +6,10 @@
 const STORE = {
   // shopping list
   items: [
-    {name: 'apples', checked: false},
-    {name: 'oranges', checked: false},
-    {name: 'milk', checked: true},
-    {name: 'bread', checked: false}
+    {name: 'apples', checked: false, hidden: false},
+    {name: 'oranges', checked: false, hidden: false},
+    {name: 'milk', checked: true, hidden: false},
+    {name: 'bread', checked: false, hidden: false}
   ],
   // hide checked items?
   hideChecked: false,
@@ -21,29 +21,30 @@ const STORE = {
 // renders shopping list and inserts it into DOM
 function renderShoppingList() {
   /* console.log('`renderShoppingList` ran'); */
-  // get search bar contents from DOM
-  let searchValue = $('.js-list-search').val().toLowerCase();
+  // hide items per `filterItems` function
+  filterItems();
 
-  // render filtered shopping list
-  let listString = generateListString(filterList(searchValue));
+  // render shopping list
+  let listString = generateListString(STORE.items);
   
   // insert rendered shopping list into DOM
   $('.js-shopping-list').html(listString);
 
   console.log('Current state of the items in `STORE`:');
   STORE.items.forEach(item => 
-    console.log(`  {name: ${item.name}, checked: ${item.checked}}`));
+    console.log(`  {name: ${item.name}, checked: ${item.checked}, hidden: ${item.hidden}}`));
 }
 
-// renders full item list from array of rendered items
+// renders full item list from array of item objects
 function generateListString(shoppingList)	{
   /* console.log('`generateListString` ran'); */
   return shoppingList
-    .map((item) => {
-      // item index in filtered list may not match item index in `STORE`,
-      // so get item index from store item with matching name
-      const itemIndex = STORE.items.findIndex(obj => obj.name === item.name);
-      return generateItemElement(item, itemIndex);
+    .map(function(item, itemIndex) {
+      if (item.hidden === false) {
+        return generateItemElement(item, itemIndex);
+      } else {
+        return generateHiddenItemElement(item, itemIndex);
+      }
     })
     .join('');
 }
@@ -67,28 +68,53 @@ function generateItemElement(item, itemIndex/*, template*/) {
 	</li>`;
 }
 
+// renders single hidden item as HTML list item
+function generateHiddenItemElement(item, itemIndex/*, template*/) {
+  /* console.log('`generateHiddenItemElement` ran'); */
+  return `
+	<li hidden class="js-item-index-element" data-item-index="${itemIndex}">
+    <div class="js-shopping-item-name">
+      <span class="shopping-item js-shopping-item ${item.checked ? 'shopping-item__checked' : ''}">${item.name}</span>
+    </div>
+		<div class="shopping-item-controls">
+			<button class="shopping-item-toggle js-item-toggle">
+					<span class="button-label">check</span>
+			</button>
+			<button class="shopping-item-delete js-item-delete">
+					<span class="button-label">delete</span>
+			</button>
+		</div>
+	</li>`;
+}
+
 
 // LIST FILTERING:
 
-// returns list of items filtered by user inputs
-function filterList(searchValue) {
-  /* console.log('`filterList` ran'); */
-  // default value is unfiltered list
-  let filteredList = STORE.items;
+// sets value of `.hidden` based on user inputs
+function filterItems() {
+  /* console.log('`filterItems` ran'); */
+  let searchValue = $('.js-list-search').val().toLowerCase();
   
-  // filter list by search value
+  // default for each item is "unhidden"
+  STORE.items.forEach(item => item.hidden = false);
+
+  // hide items not matching `searchValue`
   if (searchValue) {
-    filteredList = filteredList
-      .filter(item => item.name.toLowerCase().includes(searchValue));
-  } 
-  
-  // filter list by value of `checked`
-  if (STORE.hideChecked === true) {
-    filteredList = filteredList
-      .filter(item => item.checked === false);
+    STORE.items.forEach(item => {
+      if (!item.name.toLowerCase().includes(searchValue)) {
+        item.hidden = true;
+      }
+    });
   }
 
-  return filteredList;
+  // hide `checked` items if checkbox ticked
+  if (STORE.hideChecked === true) {
+    STORE.items.forEach(item => {
+      if (item.checked === true) {
+        item.hidden = true;
+      }
+    });
+  }
 }
 
 // listens for and handles search submissions
@@ -118,7 +144,7 @@ function handleSearchReset() {
 // listens for and handles changes to `Hide checked items` checkbox
 function handleHideChecked() {
   /* console.log('`handleHideChecked` ran'); */
-  $('.js-unchecked-only').on('change', function() {
+  $('.js-hide-checked').on('change', function() {
     // toggle value of hidChecked in `STORE`
     STORE.hideChecked = !STORE.hideChecked;
 
@@ -153,7 +179,7 @@ function handleNewItemSubmit() {
 function addItemToShoppingList(itemName) {
   /* console.log('`addItemToShoppingList` ran'); */
   console.log(`Adding "${itemName}" to shopping list`);
-  STORE.items.push({name: itemName, checked: false});
+  STORE.items.push({name: itemName, checked: false, hidden: false});
 }
 
 // listens for and handles checking off existing items
@@ -172,7 +198,6 @@ function handleItemCheckClicked() {
 // toggles value of `checked` for item at indexed location
 function toggleCheckedForListItem(itemIndex) {
   /* console.log('`toggleCheckedForListItem` ran'); */
-
   STORE.items[itemIndex].checked = !STORE.items[itemIndex].checked;
 }
 
@@ -240,9 +265,9 @@ function nameToInput(name) {
   /* console.log('`nameToInput` ran'); */
   return `
     <form class="name-editor">
-      <input type="text" name="name-value" class="js-name-value" value="${name}" onfocus="this.select()">
+      <input aria-label="name-edit-field" type="text" name="name-value" class="js-name-value" value="${name}" onfocus="this.select()">
       <button type="submit">Update</button>
-      <button type="reset">Cancel</button>
+      <button type="reset" class="js-reset">Cancel</button>
     </form>`;
 }
 
@@ -270,13 +295,13 @@ function handleNameChangeSubmit() {
 // listens for and handles form reset to close name editor
 function handleNameChangeCancel() {
   /* console.log('`handleNameChangeCancel` ran'); */
-  $('.js-shopping-item-name').on('click', '[type="reset"]', function() {
+  $('.js-shopping-list').on('click', '.js-reset', function() {
     // get item's indexed location
-    const itemIndex = getItemIndexFromElement(event.currentTarget);
+    const itemIndex = Number(getItemIndexFromElement(event.target));
 
     // get item from `STORE`
     const item = STORE.items[itemIndex];
-
+    
     // replace contents of <div> with output of `inputToName`
     $(this).closest('.js-shopping-item-name').html(inputToName(item));
   });
